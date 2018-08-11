@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<body>
+<div style="background-color: white">
+<header style="width: 100%; height: 60px; margin-bottom: 20px; display: inline-block; outline-color: red; outline-style: solid; position: absolute; ">
+  <h1 style="text-align: center;">NAME</h1>
+</header>
+<div id="map" style="width:60%;height:500px; top: 100px; display: inline-block;position: absolute; left: 400px;"></div>  
+<script type="text/javascript"
+  src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script>
+function updateScroll(){
+    
+        var element = document.getElementById("message_log");
+        element.scrollTop = element.scrollHeight;
+}
+
+var map;
+function myMap() {
+  // myCenter1 = new google.maps.LatLng(37.590799,127.02777730000003);
+  var startpoint = new google.maps.LatLng(38.590799,127.02777730000003);
+  var mapCanvas = document.getElementById("map");
+  var mapOptions = {center: startpoint, zoom: 15};
+  map = new google.maps.Map(mapCanvas, mapOptions);
+}
+$(document).ready(function() {
+      console.log("running now");
+      var canCenter = '';
+      var canMarker;
+      var phoneCenter = '';
+      var phoneMarker;
+      setInterval(function() {
+      $.ajax({
+        url:'/get_data',
+        type:'get',
+        success: function(data) {
+          console.log(data);
+          // console.log(data);
+          if (data.renew_data.can == 1){
+            if(canCenter!=''){
+              canMarker.setMap(null);                
+            }
+            canCenter = new google.maps.LatLng(data.can.lat,data.can.lon);
+            canMarker = new google.maps.Marker({
+            position:canCenter,
+            animation:google.maps.Animation.BOUNCE
+            });
+            canMarker.setMap(map);
+          }
+          if (data.renew_data.phone == 1){
+            if(phoneCenter!=''){
+              phoneMarker.setMap(null);                
+            }
+            phoneCenter = new google.maps.LatLng(data.phone.lat,data.phone.lon);
+            phoneMarker = new google.maps.Marker({
+            position:phoneCenter,
+            icon:'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+            animation:google.maps.Animation.BOUNCE
+            });
+            phoneMarker.setMap(map);
+          }
+          if (data.renew_data.sat==1){
+            $('#roll').html(data.sat.roll);
+            $('#pitch').html(data.sat.pitch);
+            $('#yaw').html(data.sat.yaw);
+          }
+          if (data.renew_data.msg==1){
+            // console.log('done!!!');
+            // console.log(data.msg.msg);
+            $('#message_log').html(data.msg.msg);
+            updateScroll();
+          }
+          if(data.renew_data.pic==1){
+            $('#pic').attr("src",data.pic.img)
+          }
+        }
+      })
+    }, 100);
+  });
+</script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBaZGlevu_JRc7mgfVEqalN39XnwKHK3qc&callback=myMap"></script>
+
+</body>
+</html>
